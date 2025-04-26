@@ -1,0 +1,20 @@
+.toolbar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.toolbar button,
+.toolbar select {
+  padding: 4px 8px;
+  font-size: 16px;
+  border: 2px solid rgb(199, 197, 197);
+  border-radius: 5px;
+}
+
+.remove-border {
+  border: none !important;
+  background: none;
+  cursor: pointer;
+}
