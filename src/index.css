@@ -22,6 +22,11 @@
   cursor: pointer;
 }
 
+ul,
+ol {
+  padding-left: 15px;
+}
+
 ul ul,
 ol ol {
   padding-left: 30px;

@@ -1,22 +1,34 @@
 import commandHandler from "./commandHandler";
 
-const keyboardShortcuts = (e) => {
+const keyboardShortcuts = (e, blocks, setBlocks) => {
   if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "*") {
     e.preventDefault();
     commandHandler("insertUnorderedList");
   } else if (e.key === "Enter") {
-    const lastword = e.target.innerHTML.split(" ").pop();
+    const lastword = e.target.innerText.split(" ").pop().trim();
+
     if (lastword.startsWith("/")) {
-      const str = lastword.replace(/<[^>]+>/g, "").slice(1);
-      console.log(str);
-      if (str == "heading") {
+      e.preventDefault();
+      const commandMap = {
+        heading: "H1",
+        paragraph: "P",
+      };
+
+      const command = lastword.replace(/<[^>]+>/g, "").slice(1);
+
+      if (commandMap[command]) {
         e.preventDefault();
-        commandHandler("formatBlock", "H1");
-      } else if (str == "paragraph") {
-        e.preventDefault();
-        commandHandler("formatBlock", "P");
+        commandHandler("formatBlock", commandMap[command]);
+        return;
       }
     }
+  } else if (e.ctrlKey && e.key === "z") {
+    // e.preventDefault();
+    // Undo logic
+    console.log("undo");
+  } else if (e.ctrlKey && e.shiftKey && e.key === "Z") {
+    // e.preventDefault();
+    // Redo logic
   }
 };
 

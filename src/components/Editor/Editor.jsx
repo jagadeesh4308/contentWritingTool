@@ -1,18 +1,28 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  keyDownHandler,
   inputHandler,
+  keyDownHandler,
   mouseUpHandler,
   replaceHandler,
+  renderBlockHandler,
 } from "../../utils/editorHandlers";
 import "./Editor.css";
 import Dropdown from "../Dropdown";
 
-const Editor = ({ setContent }) => {
-  const editorRef = useRef(null);
+const initialBlocks = [{ id: 0, type: "paragraph", content: "" }];
+
+const Editor = () => {
   const [dropdownPos, setDropdownPos] = useState(null);
   const [selectedRange, setSelectedRange] = useState(null);
-  const [highlightedText, setHighlightedText] = useState("");
+  const [highlightedText, setHighlightedText] = useState(null);
+  const [blocks, setBlocks] = useState(initialBlocks);
+
+  const blocksRefs = useRef({});
+  const editorRef = useRef(null);
+
+  useEffect(() => {
+    console.log("blocks", blocks);
+  }, [blocks]);
 
   return (
     <>
@@ -20,25 +30,38 @@ const Editor = ({ setContent }) => {
         ref={editorRef}
         className="editor"
         contentEditable
+        suppressContentEditableWarning
         onKeyDown={(e) => {
-          keyDownHandler(e);
+          keyDownHandler(e, blocks, setBlocks);
         }}
-        onInput={() => {
-          inputHandler(setContent, editorRef);
-        }}
-        onMouseUp={() =>
+        // onInput={(e) => inputHandler(e, blocks, setBlocks)}
+        onMouseUp={(e) =>
           mouseUpHandler(setSelectedRange, setHighlightedText, setDropdownPos)
         }
-        suppressContentEditableWarning
-      ></div>
+      >
+        {blocks.map((block) => (
+          <div
+            key={block.id}
+            data-id={block.id}
+            ref={(el) => {
+              blocksRefs.current[block.id] = el;
+            }}
+            tabIndex={0}
+          >
+            {renderBlockHandler(block)}
+          </div>
+        ))}
+      </div>
 
       {dropdownPos && (
         <Dropdown
-          replaceHandler={replaceHandler}
-          selectedRange={selectedRange}
-          highlightedText={highlightedText}
-          dropdownPos={dropdownPos}
-          setDropdownPos={setDropdownPos}
+          handlers={{
+            replaceHandler: replaceHandler,
+            selectedRange: selectedRange,
+            highlightedText: highlightedText,
+            dropdownPos: dropdownPos,
+            setDropdownPos: setDropdownPos,
+          }}
         />
       )}
     </>

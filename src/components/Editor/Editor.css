@@ -4,7 +4,8 @@
   background-color: #fff;
   width: 100%;
   outline: none;
-  padding: 15px;
+  padding: 15px 0;
+  white-space: normal;
 }
 
 .dropdown {
@@ -28,4 +29,19 @@
 .highlighted {
   color: rgb(250, 189, 109);
   padding: 2px 5px;
+}
+
+.code-block,
+.callout {
+  background: #e5e5e5;
+  border: 1px solid #dac8c8;
+  border-radius: 5px;
+  padding: 2px;
+  margin: 5px 0;
+}
+
+.callout {
+  width: 250px;
+  height: 150px;
+  text-wrap: wrap;
 }

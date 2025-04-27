@@ -1,7 +1,7 @@
 import commandHandler from "./commandHandler";
 import keyboardShortcuts from "./keyboardShortcuts";
 
-const keyDownHandler = (e) => {
+const keyDownHandler = (e, blocks, setBlocks) => {
   if (e.key === "Tab") {
     e.preventDefault();
     if (e.shiftKey) {
@@ -10,12 +10,63 @@ const keyDownHandler = (e) => {
       commandHandler("indent");
     }
   } else {
-    keyboardShortcuts(e);
+    keyboardShortcuts(e, blocks, setBlocks);
   }
 };
 
-const inputHandler = (setContent, editorRef) => {
-  setContent(editorRef.current.innerText);
+const renderBlockHandler = (block) => {
+  switch (block.type) {
+    case "title":
+      return <h1>{block.content}</h1>;
+    case "paragraph":
+      return <p>{block.content}</p>;
+    case "quote":
+      return <blockquote>{block.content}</blockquote>;
+    case "code":
+      return <pre>{block.content}</pre>;
+    default:
+      return <p>{block.content}</p>;
+  }
+};
+
+const inputHandler = (e, blocks, setBlocks) => {
+  const blockId = Number(e.target.getAttribute("data-id"));
+  const newContent = e.target.innerText;
+
+  // if (e.type === "Enter") {
+  //   e.preventDefault();
+  //   const updatedBlocks = [];
+  //   setBlocks((prevBlocks) => {
+  //     for (let block of prevBlocks) {
+  //       updatedBlocks.push(block);
+  //       if (block.id === blockId) {
+  //         updatedBlocks[updatedBlocks.length - 1] = {
+  //           ...block,
+  //           content: block.content,
+  //         };
+
+  //         updatedBlocks.push({
+  //           id: Date.now(),
+  //           type: "paragraph",
+  //           content: "",
+  //         });
+  //       }
+  //     }
+  //     return updatedBlocks;
+  //   });
+
+  //   console.log(updatedBlocks);
+
+  //   return;
+  // }
+
+  const newBlock = blocks.map((block) => {
+    console.log(block.id, blockId);
+    return block.id === blockId ? { ...block, content: newContent } : block;
+  });
+
+  console.log("newBlock", newBlock);
+  setBlocks(newBlock);
 };
 
 const mouseUpHandler = (
@@ -71,17 +122,19 @@ const replaceHandler = (
   setDropdownPos(null);
 };
 
-const insertBlocksHandler = (type, content) => {
+const insertBlocksHandler = (type) => {
+  const selection = window.getSelection();
+  const text = selection.toString();
   let html = "";
   switch (type) {
     case "blockquote":
-      html = `<blockquote>${content}</blockquote>`;
+      html = `<q>${text}</q>`;
       break;
     case "pre":
-      html = `<pre><code>${content}</code></pre>`;
+      html = `<pre class="code-block"><code>${text}</code></pre>`;
       break;
     case "div":
-      html = `<div class="callout">${content}</div>`;
+      html = `<div class="callout">${text}</div>`;
       break;
     default:
       return;
@@ -89,10 +142,75 @@ const insertBlocksHandler = (type, content) => {
   commandHandler("insertHTML", html);
 };
 
+const conversion = (html) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  const allowedTags = [
+    "b",
+    "i",
+    "u",
+    "strong",
+    "em",
+    "p",
+    "h1",
+    "h2",
+    "h3",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "pre",
+  ];
+
+  const cleanNode = (node) => {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      if (!allowedTags.includes(node.tagName.toLowerCase())) {
+        const fragment = document.createDocumentFragment();
+        while (node.firstChild) {
+          fragment.appendChild(node.firstChild);
+        }
+        node.parentNode.replaceChild(fragment, node);
+      } else {
+        node.removeAttribute("style");
+        node.removeAttribute("class");
+      }
+    }
+    node.childNodes.forEach(cleanNode);
+  };
+
+  doc.body.childNodes.forEach(cleanNode);
+  return doc.body.innerHTML;
+};
+
+const pasteHandler = (e, id, blocks, setBlocks) => {
+  e.preventDefault();
+  const clipboardData = e.clipboardData || window.clipboardData;
+  const htmlData = clipboardData.getData("text/html");
+  const textData = clipboardData.getData("text/plain");
+
+  let contentToInsert = textData;
+
+  if (htmlData) {
+    contentToInsert = conversion(htmlData);
+  }
+
+  const newBlocks = blocks.map((block) => {
+    if (block.id === id) {
+      return { ...block, content: block.content + contentToInsert };
+    }
+    return block;
+  });
+
+  setBlocks(newBlocks);
+};
+
 export {
   keyDownHandler,
-  inputHandler,
   mouseUpHandler,
   replaceHandler,
   insertBlocksHandler,
+  inputHandler,
+  pasteHandler,
+  renderBlockHandler,
 };

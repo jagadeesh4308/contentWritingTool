@@ -2,7 +2,7 @@ import commandHandler from "../../utils/commandHandler";
 import { insertBlocksHandler } from "../../utils/editorHandlers";
 import "./Toolbar.css";
 
-const Toolbar = ({ content }) => {
+const Toolbar = () => {
   return (
     <div className="toolbar">
       {/* heading  */}
@@ -76,19 +76,19 @@ const Toolbar = ({ content }) => {
 
       {/* Custom blocks */}
       <button
-        onClick={() => insertBlocksHandler("blockquote", content)}
+        onClick={() => insertBlocksHandler("blockquote")}
         className="remove-border"
       >
         Quote
       </button>
       <button
-        onClick={() => insertBlocksHandler("pre", content)}
+        onClick={() => insertBlocksHandler("pre")}
         className="remove-border"
       >
         Code Block
       </button>
       <button
-        onClick={() => insertBlocksHandler("div", content)}
+        onClick={() => insertBlocksHandler("div")}
         className="remove-border"
       >
         Callout

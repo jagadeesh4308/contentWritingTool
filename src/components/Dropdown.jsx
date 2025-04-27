@@ -1,10 +1,9 @@
-const Dropdown = ({
-  replaceHandler,
-  selectedRange,
-  highlightedText,
-  dropdownPos,
-  setDropdownPos,
-}) => {
+const Dropdown = ({ handlers }) => {
+  const replaceHandler = handlers.replaceHandler,
+    selectedRange = handlers.selectedRange,
+    highlightedText = handlers.highlightedText,
+    setDropdownPos = handlers.setDropdownPos,
+    dropdownPos = handlers.dropdownPos;
   return (
     <div
       className="dropdown"
@@ -46,6 +45,13 @@ const Dropdown = ({
         }
       >
         💡 Emoji
+      </button>
+      <button
+        onClick={() => {
+          setDropdownPos(null);
+        }}
+      >
+        Cancel
       </button>
     </div>
   );
